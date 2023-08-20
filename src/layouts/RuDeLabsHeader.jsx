@@ -14,7 +14,7 @@ import {
   Us1,
 } from "../_components/imagepath";
 
-const Header = (props) => {
+const RudeLabsHeader = (props) => {
 
 
   const handlesidebar = () => {
@@ -149,18 +149,7 @@ const Header = (props) => {
       <Link to="#" className="mobile_btn" id="mobile_btn" >
         <i className="fas fa-bars" />
       </Link>
-      <div className="top-nav-search">
-        <form>
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Search here"
-          />
-          <button className="btn" type="submit">
-            <img src={search} alt="img" />
-          </button>
-        </form>
-      </div>
+      
       {/* /Search */}
       {/* Mobile Menu Toggle */}
       <Link to="#" className="mobile_btn" id="mobile_btn" onClick={() => onMenuClik()}>
@@ -169,185 +158,7 @@ const Header = (props) => {
       {/* /Mobile Menu Toggle */}
       {/* Header Menu */}
       <ul className="nav nav-tabs user-menu">
-        {/* Flag */}
-        <li className="nav-item dropdown has-arrow flag-nav">
-          <Link
-            className="nav-link dropdown-toggle"
-            data-bs-toggle="dropdown"
-            to="#"
-            role="button"
-          >
-            <img src={Us1} alt="" height={20} />
-            <span>English</span>
-          </Link>
-          <div className="dropdown-menu dropdown-menu-right">
-            <Link to="#" className="dropdown-item">
-              <img src={Us} alt="" height={16} />
-              <span>English</span>
-            </Link>
-            <Link to="#" className="dropdown-item">
-              <img src={Fr} alt="" height={16} />
-              <span>French</span>
-            </Link>
-            <Link to="#" className="dropdown-item">
-              <img src={Es} alt="" height={16} />
-              <span>Spanish</span>
-            </Link>
-            <Link to="#" className="dropdown-item">
-              <img src={De} alt="" height={16} />
-              <span>German</span>
-            </Link>
-          </div>
-        </li>
-        {/* /Flag */}
-        <li className="nav-item  has-arrow dropdown-heads ">
-          <Link to="#" className="toggle-switch moon-switch">
-            {/* <i className="fe fe-moon" /> */}
-            <FeatherIcon icon="moon" />
-          </Link>
-        </li>
-        {/* /Flag */}
-        {/* /Notification  */}
-        
-        <li className="nav-item dropdown  flag-nav dropdown-heads">
-          <Link
-            className="nav-link bell-icon"
-            data-bs-toggle="dropdown"
-            to="#"
-            role="button"
-          >
-            {/* <i className="fe fe-bell" /> */}
-            <FeatherIcon icon="bell" />
-            <span className="badge rounded-pill" />
-          </Link>
-          <div className="dropdown-menu notifications">
-            <div className="topnav-dropdown-header">
-              <span className="notification-title">Notifications</span>
-              <Link to="#" className="clear-noti">
-                {" "}
-                Clear All
-              </Link>
-            </div>
-            <div className="noti-content">
-              <ul className="notification-list">
-                <li className="notification-message">
-                  <Link to="/profile">
-                    <div className="media d-flex">
-                      <span className="avatar avatar-sm">
-                        <img
-                          className="avatar-img rounded-circle"
-                          alt=""
-                          src={img2}
-                        />
-                      </span>
-                      <div className="media-body">
-                        <p className="noti-details">
-                          <span className="noti-title">Brian Johnson</span> paid
-                          the invoice{" "}
-                          <span className="noti-title">#DF65485</span>
-                        </p>
-                        <p className="noti-time">
-                          <span className="notification-time">4 mins ago</span>
-                        </p>
-                      </div>
-                    </div>
-                  </Link>
-                </li>
-                <li className="notification-message">
-                  <Link to="/profile">
-                    <div className="media d-flex">
-                      <span className="avatar avatar-sm">
-                        <img
-                          className="avatar-img rounded-circle"
-                          alt=""
-                          src={img3}
-                        />
-                      </span>
-                      <div className="media-body">
-                        <p className="noti-details">
-                          <span className="noti-title">Marie Canales</span> has
-                          accepted your estimate{" "}
-                          <span className="noti-title">#GTR458789</span>
-                        </p>
-                        <p className="noti-time">
-                          <span className="notification-time">6 mins ago</span>
-                        </p>
-                      </div>
-                    </div>
-                  </Link>
-                </li>
-                <li className="notification-message">
-                  <Link to="/profile">
-                    <div className="media d-flex">
-                      <div className="avatar avatar-sm">
-                        <span className="avatar-title rounded-circle bg-primary-light">
-                          <i className="far fa-user" />
-                        </span>
-                      </div>
-                      <div className="media-body">
-                        <p className="noti-details">
-                          <span className="noti-title">
-                            New user registered
-                          </span>
-                        </p>
-                        <p className="noti-time">
-                          <span className="notification-time">8 mins ago</span>
-                        </p>
-                      </div>
-                    </div>
-                  </Link>
-                </li>
-                <li className="notification-message">
-                  <Link to="/profile">
-                    <div className="media d-flex">
-                      <span className="avatar avatar-sm">
-                        <img
-                          className="avatar-img rounded-circle"
-                          alt=""
-                          src={img4}
-                        />
-                      </span>
-                      <div className="media-body">
-                        <p className="noti-details">
-                          <span className="noti-title">Barbara Moore</span>{" "}
-                          declined the invoice{" "}
-                          <span className="noti-title">#RDW026896</span>
-                        </p>
-                        <p className="noti-time">
-                          <span className="notification-time">12 mins ago</span>
-                        </p>
-                      </div>
-                    </div>
-                  </Link>
-                </li>
-                <li className="notification-message">
-                  <Link to="/profile">
-                    <div className="media d-flex">
-                      <div className="avatar avatar-sm">
-                        <span className="avatar-title rounded-circle bg-info-light">
-                          <i className="far fa-comment" />
-                        </span>
-                      </div>
-                      <div className="media-body">
-                        <p className="noti-details">
-                          <span className="noti-title">
-                            You have received a new message
-                          </span>
-                        </p>
-                        <p className="noti-time">
-                          <span className="notification-time">2 days ago</span>
-                        </p>
-                      </div>
-                    </div>
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div className="topnav-dropdown-footer">
-              <Link to="/notifications">View all Notifications</Link>
-            </div>
-          </div>
-        </li>
+       
         {/* /Notification  */}
 
         <li className="nav-item  has-arrow dropdown-heads ">
@@ -362,10 +173,7 @@ const Header = (props) => {
             className="user-link  nav-link"
             data-bs-toggle="dropdown"
           >
-            <span className="user-img">
-              <img src={img7} alt="img" className="profilesidebar" />
-              <span className="animate-circle" />
-            </span>
+           
             <span className="user-content">
               <span className="user-details">Admin</span>
               <span className="user-name">Atul Ranjan</span>
@@ -406,4 +214,4 @@ const Header = (props) => {
 
   );
 };
-export default Header;
+export default RudeLabsHeader;

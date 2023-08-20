@@ -247,6 +247,12 @@ import Formwizard from "./elements/formwizard";
 import ContactMessage from "./contactMessage";
 import DragDrop from "./elements/drag&drop";
 import TypiconIcons from "./icons/typicon";
+import RuDeLabsCreateInvoice from "./RuDeLabs/CreateInvoice";
+import RuDeLabsLogin from "./RuDeLabs/Login";
+import RuDeLabsInvoiceList from "./RuDeLabs/InvoiceList";
+import RuDeLabsExpenseList from "./RuDeLabs/ExpenseList";
+import RuDeLabsCreateExpenses from "./RuDeLabs/CreateExpenses";
+import RuDeLabsCreateExpense from "./RuDeLabs/CreateExpenses";
 
 const AppContainer =  (props) => {
  
@@ -257,7 +263,12 @@ const AppContainer =  (props) => {
                 <StickySidebar />
                                                            
             <Switch>
-                                             
+              <Route path="/RuDeLabsCreateInvoice" component={RuDeLabsCreateInvoice} />
+              <Route path="/RuDeLabsLogin" component={RuDeLabsLogin} />
+              <Route path="/RuDeLabsInvoiceList" component={RuDeLabsInvoiceList} />
+              <Route path="/RuDeLabsExpenseList" component={RuDeLabsExpenseList} />
+              <Route path="/RuDeLabsCreateExpense" component={RuDeLabsCreateExpense} />
+                                 
               <Route path="/index" component={Dashboard} />
               <Route path="/indextwo" component={Indextwo} />
               <Route path="/indexthree" component={Indexthree} />

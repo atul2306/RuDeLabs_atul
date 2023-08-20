@@ -1008,6 +1008,45 @@ const Sidebar = (props) => {
                 </li>
               </ul>
               {/* /Support */}
+              {/* /RuDeLabs */}
+                <ul>
+                <li
+                  className={`${
+                    "/RuDeLabsLogin" === pathName ? "active submenu" : "submenu"
+                  }`}
+                >
+                  <Link
+                    to="#"
+                    className={isSideMenu == "RuDeLabsLogin" ? "subdrop" : ""}
+                    onClick={() =>
+                      toggleSidebar(isSideMenu == "RuDeLabsLogin" ? "" : "RuDeLabsLogin")
+                    }
+                  >
+                    <FeatherIcon icon="lock" /> <span>RuDeLabs</span>
+                    <span className="menu-arrow"></span>
+                  </Link>
+                  {isSideMenu == "RuDeLabsLogin" ? (
+                    <ul
+                      style={{
+                        display: isSideMenu == "RuDeLabsLogin" ? "block" : "none",
+                      }}
+                    >
+                      <li>
+                        <Link
+                          to="/RuDeLabsLogin"
+                          className={`${"/RuDeLabsLogin" === pathName ? "active" : ""}`}
+                        >
+                          Login
+                        </Link>
+                      </li>
+                    </ul>
+                  ) : (
+                    ""
+                  )}
+                </li>
+              </ul>
+              {/* /RuDeLabs */}
+
               {/* Authentication */}
               <ul>
                 <li
