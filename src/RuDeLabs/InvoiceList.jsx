@@ -1,26 +1,156 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import Header from "../layouts/Header";
-import Sidebar from "../layouts/Sidebar";
-import FeatherIcon from "feather-icons-react";
-import Data from "../assets/jsons/invoiceList";
 import "../_components/antd.css";
-import { Pagination, Table } from "antd";
+import { Button, Input, Pagination, Space, Table } from "antd";
 import {
   onShowSizeChange,
   itemRender,
 } from "../_components/paginationfunction";
+import Highlighter from 'react-highlight-words'
 import AddVendor from "../vendors/addVendor";
 import RuDeLabsSideBar from "../layouts/RuDeLabsSideBar";
 import RudeLabsHeader from "../layouts/RuDeLabsHeader";
-// import InvoiceHead from "./invoiceHead";
-
+import StartFireBase from "./database/FireBaseConfig";
+import { collection, getDoc, getDocs } from "firebase/firestore";
+import { AddInvoiceAction, ResetStoreAction, TotalAmountAction } from "./redux/action/InvoiceAction";
+import {SearchOutlined} from '@ant-design/icons'
+import { useDispatch, useSelector } from "react-redux";
+import FeatherIcon from "feather-icons-react/build/FeatherIcon";
+import { useRef } from "react";
+ 
 const RuDeLabsInvoiceList = () => {
-
+  const [searchText, setSearchText] = useState('');
+  const [searchedColumn, setSearchedColumn] = useState('');
+  const searchInput = useRef(null);
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+  };
+  const handleReset = (clearFilters) => {
+    clearFilters();
+    setSearchText('');
+  };
+  const getColumnSearchProps = (dataIndex) => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
+      <div
+        style={{
+          padding: 8,
+        }}
+        onKeyDown={(e) => e.stopPropagation()}
+      >
+        <Input
+          ref={searchInput}
+          placeholder={`Search ${dataIndex}`}
+          value={selectedKeys[0]}
+          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+          style={{
+            marginBottom: 8,
+            display: 'block',
+          }}
+        />
+        <Space>
+          <Button
+            type="primary"
+            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+            icon={<SearchOutlined />}
+            size="small"
+            style={{
+              width: 90,
+            }}
+          >
+            Search
+          </Button>
+          <Button
+            onClick={() => clearFilters && handleReset(clearFilters)}
+            size="small"
+            style={{
+              width: 90,
+            }}
+          >
+            Reset
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              confirm({
+                closeDropdown: false,
+              });
+              setSearchText(selectedKeys[0]);
+              setSearchedColumn(dataIndex);
+            }}
+          >
+            Filter
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              close();
+            }}
+          >
+            close
+          </Button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered) => (
+      <SearchOutlined
+        style={{
+          color: filtered ? '#1677ff' : undefined,
+        }}
+      />
+    ),
+    onFilter: (value, record) =>
+      record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
+    onFilterDropdownOpenChange: (visible) => {
+      if (visible) {
+        setTimeout(() => searchInput.current?.select(), 100);
+      }
+    },
+    render: (text) =>
+      searchedColumn === dataIndex ? (
+        <Highlighter
+          highlightStyle={{
+            backgroundColor: '#ffc069',
+            padding: 0,
+          }}
+          searchWords={[searchText]}
+          autoEscape
+          textToHighlight={text ? text.toString() : ''}
+        />
+      ) : (
+        text
+      ),
+  });
+   
   const [menu, setMenu] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [show, setShow] = useState(false);
+  const [invoiceData, setInvoiceData]= useState([])
+  const dispatch= useDispatch()
+
+  const getDataFromDb = async()=>{
+    
+    const db =  StartFireBase()
+    const getData = await getDocs(collection(db,"invoice"))
+    dispatch(ResetStoreAction());
+
+    getData.forEach((invoice) => {
+      const amount = invoice.data();
+     dispatch(TotalAmountAction(amount.Total))
+      const action = AddInvoiceAction({...invoice.data()})
+       dispatch(action)
+    });
+   }
+   
+  useEffect(()=>{
+      
+    getDataFromDb()
+
+  },[])
 
   const toggleMobileMenu = () => {
     setMenu(!menu);
@@ -30,10 +160,27 @@ const RuDeLabsInvoiceList = () => {
     console.log("selectedRowKeys changed: ", selectedRowKeys);
     setSelectedRowKeys(newSelectedRowKeys);
   };
+  
+  const formatTimestampToDateTime = (timestamp) => {
+    const date = new Date(timestamp * 1000);
+    return date.toLocaleDateString(); // Adjust the format as needed
+  };
 
-  const datasource = Data?.Data;
-  console.log(datasource);
 
+  const invoice = useSelector((state)=>state.allInvoice.invoices)
+  const amount = useSelector((state)=>state.allAmount)
+  
+  const updatedInvoice = invoice.map((data) => {
+     const Due_Data= data.Due.seconds
+     const Created_Data= data.Created.seconds
+    return {
+      ...data,
+      Due: formatTimestampToDateTime(Due_Data),
+      Created: formatTimestampToDateTime(Created_Data),
+      
+      
+    };
+  });
   const rowSelection = {
     selectedRowKeys,
     onChange: onSelectChange,
@@ -49,60 +196,35 @@ const RuDeLabsInvoiceList = () => {
         </Link>
       ),
       sorter: (a, b) => a.Invoice.length - b.Invoice.length,
-    },
-    {
-      title: "Category",
-      dataIndex: "Category",
-      sorter: (a, b) => a.Category.length - b.Category.length,
+      ...getColumnSearchProps("Invoice")
     },
     {
       title: "Created On",
       dataIndex: "Created",
       sorter: (a, b) => a.Created.length - b.Created.length,
+      ...getColumnSearchProps("Created")
+
     },
     {
       title: "Invoice To",
       dataIndex: "Name",
-      render: (text, record) => (
-        <h2 className="table-avatar">
-          <Link to="/profile" className="avatar avatar-sm me-2">
-            <img
-              className="avatar-img rounded-circle"
-              src={record.img}
-              alt="User Image"
-            />
-          </Link>
-          <Link to="/profile">
-            {record.Name} <span>{record.email}</span>
-          </Link>
-        </h2>
-      ),
       sorter: (a, b) => a.Name.length - b.Name.length,
+      ...getColumnSearchProps("Name")
+
     },
     {
       title: "Total Amount",
       dataIndex: "Total",
       sorter: (a, b) => a.Total.length - b.Total.length,
-    },
-    {
-      title: "Paid Amount",
-      dataIndex: "Paid",
-      sorter: (a, b) => a.Paid.length - b.Paid.length,
-    },
-    {
-      title: "Payment Mode",
-      dataIndex: "Payment",
-      sorter: (a, b) => a.Payment.length - b.Payment.length,
-    },
-    {
-      title: "Balance",
-      dataIndex: "Balance",
-      sorter: (a, b) => a.Balance.length - b.Balance.length,
+      ...getColumnSearchProps("Total")
+      
     },
     {
       title: "Due Date",
       dataIndex: "Due",
       sorter: (a, b) => a.Due.length - b.Due.length,
+      ...getColumnSearchProps("Due")
+
     },
     {
       title: "Status",
@@ -111,47 +233,10 @@ const RuDeLabsInvoiceList = () => {
         <span className="badge bg-success-light">{text}</span>
       ),
       sorter: (a, b) => a.Status.length - b.Status.length,
+      ...getColumnSearchProps("Status")
+
     },
-    {
-      title: "Action",
-      dataIndex: "Action",
-      render: (text, record) => (
-        <>
-          <div className="text-end">
-            <div className="dropdown dropdown-action">
-              <Link
-                to="#"
-                className="btn-action-icon"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                <i className="fas fa-ellipsis-v" />
-              </Link>
-              <div className="dropdown-menu dropdown-menu-end">
-                <Link className="dropdown-item" to="/edit-invoice">
-                  <i className="far fa-edit me-2" />
-                  Edit
-                </Link>
-                <Link className="dropdown-item" to="/invoice-details">
-                  <i className="far fa-eye me-2" />
-                  View
-                </Link>
-                <Link
-                  className="dropdown-item"
-                  to="#"
-                  data-bs-toggle="modal"
-                  data-bs-target="#delete_modal"
-                >
-                  <i className="far fa-trash-alt me-2" />
-                  Delete
-                </Link>
-              </div>
-            </div>
-          </div>
-        </>
-      ),
-      sorter: (a, b) => a.Action.length - b.Action.length,
-    },
+    
   ];
 
   return (
@@ -159,14 +244,26 @@ const RuDeLabsInvoiceList = () => {
       <div className={`main-wrapper ${menu ? "slide-nav" : ""}`}>
         <RudeLabsHeader onMenuClick={(value) => toggleMobileMenu()} />
         <RuDeLabsSideBar />
-
+        
         <div className="page-wrapper">
           <div className="content container-fluid">
-            
-            {/* <InvoiceHead
-              setShow={setShow}
-              show={show}
-            /> */}
+          <div className="row">
+        <div className="col-xl-2 col-lg-4 col-sm-6 col-12 d-flex">
+          <div className="card inovices-card w-100">
+            <div className="card-body">
+              <div className="dash-widget-header">
+                <div className="dash-count">
+                  <div className="dash-title">Total Amount</div>
+                  <div className="dash-counts">
+                    <p>${amount}</p>
+                  </div>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+        </div>
+      </div> 
             <div className="page-header">
         <div className="content-page-header">
           <h5>Invoices</h5>
@@ -190,24 +287,9 @@ const RuDeLabsInvoiceList = () => {
                     <div className="invoices-tabs">
                       <ul>
                         <li>
-                          <Link to="/invoices" className="active">
+                          <Link to="/RuDeLabsInvoiceList" className="active">
                             All Invoice
                           </Link>
-                        </li>
-                        <li>
-                          <Link to="/invoice-paid">Paid</Link>
-                        </li>
-                        <li>
-                          <Link to="/invoice-overdue">Overdue</Link>
-                        </li>
-                        <li>
-                          <Link to="/invoice-draft">Draft</Link>
-                        </li>
-                        <li>
-                          <Link to="/invoice-recurring">Recurring</Link>
-                        </li>
-                        <li>
-                          <Link to="/invoice-cancelled">Cancelled</Link>
                         </li>
                       </ul>
                     </div>
@@ -224,16 +306,16 @@ const RuDeLabsInvoiceList = () => {
                     <div className="table-responsive table-hover">
                       <Table
                         pagination={{
-                          total: datasource.length,
+                          total: updatedInvoice.length,
                           showTotal: (total, range) =>
                             `Showing ${range[0]} to ${range[1]} of ${total} entries`,
                           showSizeChanger: true,
                           onShowSizeChange: onShowSizeChange,
                           itemRender: itemRender,
                         }}
-                        rowSelection={rowSelection}
+                        // rowSelection={rowSelection}
                         columns={columns}
-                        dataSource={datasource}
+                        dataSource={updatedInvoice}
                         rowKey={(record) => record.id}
                       />
                     </div>

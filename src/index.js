@@ -1,7 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import AppRouter from './approuter';
-
+import { Provider } from "react-redux"
+import store from './RuDeLabs/redux/store';
 // boostrap
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './assets/js/bootstrap.bundle.min.js';
@@ -41,7 +42,7 @@ window.jQuery = jQuery;
 // ReactDOM.createRoot(document.getElementById('root')).render(<AppRouter />);
 const container = document.getElementById('root');
 const newRoot = ReactDOM.createRoot(container); 
-newRoot.render(<AppRouter />);
+newRoot.render(<Provider store={store}><AppRouter /></Provider> );
 
 if (module.hot) { // enables hot module replacement if plugin is installed
  module.hot.accept();

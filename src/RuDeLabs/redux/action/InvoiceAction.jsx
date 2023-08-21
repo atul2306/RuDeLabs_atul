@@ -1,0 +1,19 @@
+export const AddInvoiceAction = (invoice)=>{
+    return {
+        type: "ADD_INVOICE",
+        payload:invoice
+    }
+}
+
+export const ResetStoreAction = () => {
+    return {
+      type: "RESET_STORE",
+    };
+  };
+
+  export const TotalAmountAction = (amount)=>{
+    return {
+        type: "TOTAL_AMOUNT",
+        payload: amount
+    }
+  }
