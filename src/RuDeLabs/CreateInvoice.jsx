@@ -9,85 +9,82 @@ import Select2 from "react-select2-wrapper";
 import RuDeLabsSideBar from "../layouts/RuDeLabsSideBar";
 import RudeLabsHeader from "../layouts/RuDeLabsHeader";
 import { useDispatch } from "react-redux";
-import { AddInvoiceAction, ResetStoreAction, TotalAmountAction} from "./redux/action/InvoiceAction"
-import StartFireBase from "./database/FireBaseConfig"
-import { addDoc ,collection, getDocs } from "firebase/firestore"
+import {
+  AddInvoiceAction,
+  ResetStoreAction,
+  TotalAmountAction,
+} from "./redux/action/InvoiceAction";
+import StartFireBase from "./firebase/FireBaseConfig";
+import { addDoc, collection, getDocs } from "firebase/firestore";
 import { async } from "regenerator-runtime";
-import { Redirect  } from "react-router-dom";
+import { Redirect } from "react-router-dom";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import { AddExpenseAction } from "./redux/action/ExpenseAction";
 const RuDeLabsCreateInvoice = () => {
   const [menu, setMenu] = useState(false);
   const [startDate, setStartDate] = useState(new Date());
-  const [invoiceNo , setInvoiceNo] =  useState()
-  const [organisation , setOrganisation] =  useState()
-  const [invoiceDate , setInvoiceDate] =  useState(new Date())
-  const [dueDate , setDueDate] =  useState(new Date())
-  const [amount , setAmount] =  useState(0)
-  
+  const [invoiceNo, setInvoiceNo] = useState();
+  const [organisation, setOrganisation] = useState();
+  const [invoiceDate, setInvoiceDate] = useState(new Date());
+  const [dueDate, setDueDate] = useState(new Date());
+  const [amount, setAmount] = useState(0);
+
   const toggleMobileMenu = () => {
     setMenu(!menu);
   };
-  const dispatch = useDispatch()
-  
+  const dispatch = useDispatch();
 
-  const saveInvoice = async()=>{
+  const saveInvoice = async () => {
+    const db = StartFireBase();
 
-    
-      const db = StartFireBase();
-     
-    dispatch(TotalAmountAction(amount))
-     
-        try {
-          await addDoc(collection(db, "invoice"), {
-            Total: amount,
-            Due: dueDate,
-            Invoice: invoiceNo,
-            Created: invoiceDate,
-            Name: organisation,
-            Status:"Pending"
-          });
-        
-          
-          
-        } catch (error) {
-          // Handle any errors that occurred during addDoc or getDocs
-          console.log(error);
-        }
-        
-      
+    dispatch(TotalAmountAction(amount));
 
-     
-     
-  
-   
-  }
-   
-   const getDataFromDb = async()=>{
-      
-    const db =  StartFireBase()
-    const getData = await getDocs(collection(db,"invoice"))
+    try {
+      await addDoc(collection(db, "invoice"), {
+        Total: amount,
+        Due: dueDate,
+        Invoice: invoiceNo,
+        Created: invoiceDate,
+        Name: organisation,
+        Status: "Pending",
+      });
+    } catch (error) {
+      // Handle any errors that occurred during addDoc or getDocs
+      console.log(error);
+    }
+  };
+
+  const getDataFromDb = async () => {
+    const db = StartFireBase();
+    const getDataInvoice = await getDocs(collection(db, "invoice"));
+    const getDataExpense = await getDocs(collection(db, "expense"));
     dispatch(ResetStoreAction());
-    
-    getData.forEach((invoice) => {
-      const amount = invoice.data();
-      const idAdded= {...amount,id:invoice.id}
-      if(amount.Status==="Paid")
-     dispatch(TotalAmountAction(amount.Total))
 
-      const action = AddInvoiceAction({...idAdded})
-       dispatch(action)
+    getDataExpense.forEach((expense) => {
+      const amount = expense.data();
+      const idAdded = { ...amount, id: expense.id };
+      if (amount.Status === "Paid")
+        dispatch(TotalAmountAction({ val: amount.Amount, sign: "-" }));
+
+      const action = AddExpenseAction({ ...idAdded });
+      dispatch(action);
     });
-   }
-   
-  useEffect(()=>{
-     
-    getDataFromDb()
+    getDataInvoice.forEach((invoice) => {
+      const amount = invoice.data();
+      const idAdded = { ...amount, id: invoice.id };
+      if (amount.Status === "Paid")
+        dispatch(TotalAmountAction({ val: amount.Total, sign: "+" }));
 
-  },[])
+      const action = AddInvoiceAction({ ...idAdded });
+      dispatch(action);
+    });
+  };
 
   useEffect(() => {
-     
-     
+    getDataFromDb();
+  }, []);
+
+  useEffect(() => {
     let elements = Array.from(
       document.getElementsByClassName("react-datepicker-wrapper")
     );
@@ -121,7 +118,7 @@ const RuDeLabsCreateInvoice = () => {
                               type="text"
                               className="form-control"
                               placeholder="Enter Invoice Number"
-                              onChange={(e)=>setInvoiceNo(e.target.value)}
+                              onChange={(e) => setInvoiceNo(e.target.value)}
                             />
                           </div>
                         </div>
@@ -132,7 +129,7 @@ const RuDeLabsCreateInvoice = () => {
                               type="text"
                               className="form-control"
                               placeholder="Enter Organisation Name"
-                              onChange={(e)=>setOrganisation(e.target.value)}
+                              onChange={(e) => setOrganisation(e.target.value)}
                             />
                           </div>
                         </div>
@@ -168,7 +165,7 @@ const RuDeLabsCreateInvoice = () => {
                               type="text"
                               className="form-control"
                               placeholder="Enter Amount( in Rs )"
-                              onChange={(e)=>setAmount(e.target.value)}
+                              onChange={(e) => setAmount(e.target.value)}
                             />
                           </div>
                         </div>
@@ -189,10 +186,14 @@ const RuDeLabsCreateInvoice = () => {
                       >
                         Cancel
                       </Link>
-                      <Link type="submit" className="btn btn-primary" onClick={saveInvoice} to="/RuDeLabsInvoiceList" >
-                      Save Changes
+                      <Link
+                        type="submit"
+                        className="btn btn-primary"
+                        onClick={saveInvoice}
+                        to="/RuDeLabsInvoiceList"
+                      >
+                        Save Changes
                       </Link>
-                      
                     </div>
                   </div>
                 </div>

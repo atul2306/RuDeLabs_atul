@@ -6,10 +6,12 @@
  
 
  const TotalAmountReducer = (state= 0,{type,payload}) =>{
-    console.log(payload);
     switch (type) {
         case "TOTAL_AMOUNT":{
-            return state+Number(payload);
+            if(payload.sign==="+")
+            return state+Number(payload.val);
+            else 
+            return state-Number(payload.val);
         }
         case "RESET_STORE": {
             return 0; 

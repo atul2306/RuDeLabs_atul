@@ -46,7 +46,6 @@ const RuDeLabsLogin = (props) => {
 	  })
     
   const  onSubmit = (data) => {
-	  console.log("data", data)
 	 
     if(data.password != "123456") {
       setError('password', {

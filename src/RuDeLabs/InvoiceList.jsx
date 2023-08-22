@@ -10,13 +10,14 @@ import Highlighter from 'react-highlight-words'
 import AddVendor from "../vendors/addVendor";
 import RuDeLabsSideBar from "../layouts/RuDeLabsSideBar";
 import RudeLabsHeader from "../layouts/RuDeLabsHeader";
-import StartFireBase from "./database/FireBaseConfig";
+import StartFireBase from "./firebase/FireBaseConfig";
 import { collection, doc, getDoc, getDocs, updateDoc } from "firebase/firestore";
 import { AddInvoiceAction, ResetStoreAction, TotalAmountAction } from "./redux/action/InvoiceAction";
 import {SearchOutlined} from '@ant-design/icons'
 import { useDispatch, useSelector } from "react-redux";
 import FeatherIcon from "feather-icons-react/build/FeatherIcon";
 import { useRef } from "react";
+import { AddExpenseAction } from "./redux/action/ExpenseAction";
  
 const RuDeLabsInvoiceList = () => {
   const [searchText, setSearchText] = useState('');
@@ -132,23 +133,31 @@ const RuDeLabsInvoiceList = () => {
   const [invoiceData, setInvoiceData]= useState([])
   const dispatch= useDispatch()
 
-  const getDataFromDb = async()=>{
-    
-    const db =  StartFireBase()
-    const getData = await getDocs(collection(db,"invoice"))
+  const getDataFromDb = async () => {
+    const db = StartFireBase();
+    const getDataInvoice = await getDocs(collection(db, "invoice"));
+    const getDataExpense = await getDocs(collection(db, "expense"));
     dispatch(ResetStoreAction());
-
-    getData.forEach((invoice) => {
-      const amount = invoice.data();
-      const idAdded= {...amount,id:invoice.id}
-      if(amount.Status==="Paid")
-      dispatch(TotalAmountAction(amount.Total))
-      const action = AddInvoiceAction({...idAdded})
-       dispatch(action)
+  
+    getDataExpense.forEach((expense) => {
+      const amount = expense.data();
+      const idAdded = { ...amount, id: expense.id };
+      if (amount.Status === "Paid") dispatch(TotalAmountAction({val:amount.Amount,sign:"-"}));
+      
+      const action = AddExpenseAction({ ...idAdded });
+      dispatch(action);
     });
-   }
+    getDataInvoice.forEach((invoice) => {
+      const amount = invoice.data();
+      const idAdded = { ...amount, id: invoice.id };
+      if (amount.Status === "Paid") dispatch(TotalAmountAction({val:amount.Total,sign:"+"}));
+
+      const action = AddInvoiceAction({ ...idAdded });
+      dispatch(action);
+    });
+  };
    
-  useEffect(()=>{
+  useEffect (()=>{
       
     getDataFromDb()
 
@@ -162,7 +171,7 @@ const RuDeLabsInvoiceList = () => {
   
   const formatTimestampToDateTime = (timestamp) => {
     const date = new Date(timestamp * 1000);
-    return date.toLocaleDateString(); // Adjust the format as needed
+    return date.toLocaleDateString(); 
   };
 
 
@@ -184,7 +193,6 @@ const RuDeLabsInvoiceList = () => {
 
   const handleOptionSelect = async(option)=>{
     try{
-      console.log(selectedRowId,186);
          const db = StartFireBase()
             const docRef=  doc(db,"invoice",selectedRowId)
             const docSnapshot = await getDoc(docRef);
@@ -194,9 +202,7 @@ const RuDeLabsInvoiceList = () => {
                Status:option
            }) 
            getDataFromDb()
-          } else {
-              console.log("Document does not exist.");
-          }
+          } 
 
           }
           catch(err){
@@ -211,6 +217,8 @@ const RuDeLabsInvoiceList = () => {
       },
     };
   };
+
+  
 
   const columns = [
     {
@@ -272,13 +280,15 @@ const RuDeLabsInvoiceList = () => {
          )}
        </div>
       
-      <div className="dropdown dropdown-action">
+       {text === "Pending" && (
+        <div className="dropdown dropdown-action">
               <Link
-                className=" btn-action-icon "
+                className="btn-action-icon"
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
+                
               >
-                <i className="fas fa-ellipsis-v" />
+                <i  className="fas fa-ellipsis-v" />
               </Link>
               <div className="dropdown-menu dropdown-menu-right">
                 <ul>
@@ -286,7 +296,7 @@ const RuDeLabsInvoiceList = () => {
                     <Link
                       className="dropdown-item"
                       onClick= {(event)=>{event.preventDefault();handleOptionSelect("Paid")}}
-
+                      
                     >
                       Paid
                     </Link>
@@ -302,7 +312,10 @@ const RuDeLabsInvoiceList = () => {
                   </li>
                 </ul>
               </div>
+              
             </div>
+         )}
+      
             </div>
       ),
       sorter: (a, b) => a.Status.length - b.Status.length,
@@ -400,45 +413,8 @@ const RuDeLabsInvoiceList = () => {
           </div>
         </div>
 
-        <AddVendor 
-          setShow={setShow}
-          show={show}
-        />
-
-        <div className="modal custom-modal fade" id="delete_modal" role="dialog">
-          <div className="modal-dialog modal-dialog-centered modal-md">
-            <div className="modal-content">
-              <div className="modal-body">
-                <div className="form-header">
-                  <h3>Delete Invoice</h3>
-                  <p>Are you sure want to delete?</p>
-                </div>
-                <div className="modal-btn delete-action">
-                  <div className="row">
-                    <div className="col-6">
-                      <button
-                        type="reset"
-                        data-bs-dismiss="modal"
-                        className="w-100 btn btn-primary paid-continue-btn"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                    <div className="col-6">
-                      <button
-                        type="submit"
-                        data-bs-dismiss="modal"
-                        className="w-100 btn btn-primary paid-cancel-btn"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+       
+        
 
       </div>
     </>
