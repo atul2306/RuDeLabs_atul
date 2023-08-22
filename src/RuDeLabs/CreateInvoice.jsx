@@ -34,6 +34,7 @@ const RuDeLabsCreateInvoice = () => {
 
     
       const db = StartFireBase();
+     
     dispatch(TotalAmountAction(amount))
      
         try {
@@ -43,7 +44,7 @@ const RuDeLabsCreateInvoice = () => {
             Invoice: invoiceNo,
             Created: invoiceDate,
             Name: organisation,
-            Status:"Paid"
+            Status:"Pending"
           });
         
           
@@ -69,11 +70,12 @@ const RuDeLabsCreateInvoice = () => {
     
     getData.forEach((invoice) => {
       const amount = invoice.data();
+      const idAdded= {...amount,id:invoice.id}
+      if(amount.Status==="Paid")
      dispatch(TotalAmountAction(amount.Total))
 
-      const action = AddInvoiceAction({...invoice.data()})
+      const action = AddInvoiceAction({...idAdded})
        dispatch(action)
-       // setReadData((initial)=>[...initial,{...invoice.data().data}])
     });
    }
    

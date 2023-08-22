@@ -11,7 +11,7 @@ import AddVendor from "../vendors/addVendor";
 import RuDeLabsSideBar from "../layouts/RuDeLabsSideBar";
 import RudeLabsHeader from "../layouts/RuDeLabsHeader";
 import StartFireBase from "./database/FireBaseConfig";
-import { collection, getDoc, getDocs } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, updateDoc } from "firebase/firestore";
 import { AddInvoiceAction, ResetStoreAction, TotalAmountAction } from "./redux/action/InvoiceAction";
 import {SearchOutlined} from '@ant-design/icons'
 import { useDispatch, useSelector } from "react-redux";
@@ -127,7 +127,7 @@ const RuDeLabsInvoiceList = () => {
   });
    
   const [menu, setMenu] = useState(false);
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [selectedRowId, setSelectedRowId] = useState("");
   const [show, setShow] = useState(false);
   const [invoiceData, setInvoiceData]= useState([])
   const dispatch= useDispatch()
@@ -140,8 +140,10 @@ const RuDeLabsInvoiceList = () => {
 
     getData.forEach((invoice) => {
       const amount = invoice.data();
-     dispatch(TotalAmountAction(amount.Total))
-      const action = AddInvoiceAction({...invoice.data()})
+      const idAdded= {...amount,id:invoice.id}
+      if(amount.Status==="Paid")
+      dispatch(TotalAmountAction(amount.Total))
+      const action = AddInvoiceAction({...idAdded})
        dispatch(action)
     });
    }
@@ -156,10 +158,7 @@ const RuDeLabsInvoiceList = () => {
     setMenu(!menu);
   };
 
-  const onSelectChange = (newSelectedRowKeys) => {
-    console.log("selectedRowKeys changed: ", selectedRowKeys);
-    setSelectedRowKeys(newSelectedRowKeys);
-  };
+ 
   
   const formatTimestampToDateTime = (timestamp) => {
     const date = new Date(timestamp * 1000);
@@ -181,9 +180,36 @@ const RuDeLabsInvoiceList = () => {
       
     };
   });
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: onSelectChange,
+
+
+  const handleOptionSelect = async(option)=>{
+    try{
+      console.log(selectedRowId,186);
+         const db = StartFireBase()
+            const docRef=  doc(db,"invoice",selectedRowId)
+            const docSnapshot = await getDoc(docRef);
+            if (docSnapshot.exists()) {
+              // const documentData = docSnapshot.data();
+           await updateDoc(docRef,{
+               Status:option
+           }) 
+           getDataFromDb()
+          } else {
+              console.log("Document does not exist.");
+          }
+
+          }
+          catch(err){
+             console.log(err);
+          }
+  }
+
+  const onRowClick = (record) => {
+    return {
+      onClick: () => {
+        setSelectedRowId(record.id)
+      },
+    };
   };
 
   const columns = [
@@ -230,12 +256,59 @@ const RuDeLabsInvoiceList = () => {
       title: "Status",
       dataIndex: "Status",
       render: (text, record) => (
-        <span className="badge bg-success-light">{text}</span>
+        
+        <div className="d-flex align-items-center">
+
+         <div>
+         {text === "Paid" && (
+           <span className="badge bg-success-light text-success-light">
+             {text}
+           </span>
+         )}
+         {text === "Pending" && (
+           <span className="badge bg-warning-light text-warning-light">
+             {text}
+           </span>
+         )}
+       </div>
+      
+      <div className="dropdown dropdown-action">
+              <Link
+                className=" btn-action-icon "
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                <i className="fas fa-ellipsis-v" />
+              </Link>
+              <div className="dropdown-menu dropdown-menu-right">
+                <ul>
+                  <li>
+                    <Link
+                      className="dropdown-item"
+                      onClick= {(event)=>{event.preventDefault();handleOptionSelect("Paid")}}
+
+                    >
+                      Paid
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      className="dropdown-item"
+                      onClick= {(event)=>{event.preventDefault();handleOptionSelect("Pending")}}
+
+                    >
+                      Pending
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            </div>
       ),
       sorter: (a, b) => a.Status.length - b.Status.length,
-      ...getColumnSearchProps("Status")
 
     },
+    
     
   ];
 
@@ -313,7 +386,7 @@ const RuDeLabsInvoiceList = () => {
                           onShowSizeChange: onShowSizeChange,
                           itemRender: itemRender,
                         }}
-                        // rowSelection={rowSelection}
+                        onRow={onRowClick}
                         columns={columns}
                         dataSource={updatedInvoice}
                         rowKey={(record) => record.id}
