@@ -1,11 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import DatePicker from "react-datepicker";
-import Header from "../layouts/Header";
-import Sidebar from "../layouts/Sidebar";
-import { Logo, signature, circle1, circle2 } from "../_components/imagepath";
-import FeatherIcon from "feather-icons-react";
-import Select2 from "react-select2-wrapper";
 import RuDeLabsSideBar from "../layouts/RuDeLabsSideBar";
 import RudeLabsHeader from "../layouts/RuDeLabsHeader";
 import { useDispatch } from "react-redux";
@@ -13,16 +8,13 @@ import {
   AddInvoiceAction,
   ResetStoreAction,
   TotalAmountAction,
+  TotalAmountReceivedAction,
 } from "./redux/action/InvoiceAction";
 import StartFireBase from "./firebase/FireBaseConfig";
 import { addDoc, collection, getDocs } from "firebase/firestore";
-import { async } from "regenerator-runtime";
-import { Redirect } from "react-router-dom";
-import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import { AddExpenseAction } from "./redux/action/ExpenseAction";
 const RuDeLabsCreateInvoice = () => {
   const [menu, setMenu] = useState(false);
-  const [startDate, setStartDate] = useState(new Date());
   const [invoiceNo, setInvoiceNo] = useState();
   const [organisation, setOrganisation] = useState();
   const [invoiceDate, setInvoiceDate] = useState(new Date());
@@ -72,8 +64,10 @@ const RuDeLabsCreateInvoice = () => {
     getDataInvoice.forEach((invoice) => {
       const amount = invoice.data();
       const idAdded = { ...amount, id: invoice.id };
-      if (amount.Status === "Paid")
+      if (amount.Status === "Paid") {
         dispatch(TotalAmountAction({ val: amount.Total, sign: "+" }));
+        dispatch(TotalAmountReceivedAction(amount.Total));
+      }
 
       const action = AddInvoiceAction({ ...idAdded });
       dispatch(action);

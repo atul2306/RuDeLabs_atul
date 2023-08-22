@@ -17,3 +17,9 @@ export const ResetStoreAction = () => {
         payload: amount
     }
   }
+  export const TotalAmountReceivedAction = (amount)=>{
+    return {
+        type: "TOTAL_AMOUNT_RECEIVED",
+        payload: amount
+    }
+  }

@@ -1,17 +1,11 @@
 import React, { useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import Select2 from "react-select2-wrapper";
-import Header from "../layouts/Header";
-import Sidebar from "../layouts/Sidebar";
 import "../_components/antd.css";
 import { Button, DatePicker, Input, Pagination, Space, Table } from "antd";
-import Data from "../assets/jsons/expenses";
-import FeatherIcon from "feather-icons-react";
 import {
   onShowSizeChange,
   itemRender,
 } from "../_components/paginationfunction";
-import AddVendor from "../vendors/addVendor";
 import RuDeLabsSideBar from "../layouts/RuDeLabsSideBar";
 import { SearchOutlined } from "@ant-design/icons";
 
@@ -26,14 +20,12 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  AddExpenseAction,
-  ExpenseAmountAction,
-} from "./redux/action/ExpenseAction";
+import { AddExpenseAction } from "./redux/action/ExpenseAction";
 import {
   AddInvoiceAction,
   ResetStoreAction,
   TotalAmountAction,
+  TotalAmountReceivedAction,
 } from "./redux/action/InvoiceAction";
 
 const RuDeLabsExpenseList = () => {
@@ -178,8 +170,10 @@ const RuDeLabsExpenseList = () => {
     getDataInvoice.forEach((invoice) => {
       const amount = invoice.data();
       const idAdded = { ...amount, id: invoice.id };
-      if (amount.Status === "Paid")
+      if (amount.Status === "Paid") {
         dispatch(TotalAmountAction({ val: amount.Total, sign: "+" }));
+        dispatch(TotalAmountReceivedAction(amount.Total));
+      }
 
       const action = AddInvoiceAction({ ...idAdded });
       dispatch(action);
@@ -230,7 +224,7 @@ const RuDeLabsExpenseList = () => {
     if (Number(selectedRowAmount) > Number(amount)) {
       setValid(true);
     }
-    
+
     return {
       onClick: () => {
         setSelectedRowId(record.id);
@@ -239,11 +233,7 @@ const RuDeLabsExpenseList = () => {
     };
   };
 
-  const checkValid = () => {
-    
-  };
-
-  // const datasource = Data?.Data;
+  const checkValid = () => {};
 
   const columns = [
     {
@@ -304,8 +294,12 @@ const RuDeLabsExpenseList = () => {
                       className="dropdown-item"
                       onClick={(event) => {
                         event.preventDefault();
-                        if(!valid)
-                        handleOptionSelect("Paid");
+                        if (!valid) handleOptionSelect("Paid");
+                        else {
+                          window.alert(
+                            "remaining amount is less than amount to be paid"
+                          );
+                        }
                       }}
                     >
                       Paid
@@ -316,8 +310,12 @@ const RuDeLabsExpenseList = () => {
                       className="dropdown-item"
                       onClick={(event) => {
                         event.preventDefault();
-                        if(!valid)
-                        handleOptionSelect("Pending");
+                        if (!valid) handleOptionSelect("Pending");
+                        else {
+                          window.alert(
+                            "remaining amount is less than amount to be paid"
+                          );
+                        }
                       }}
                     >
                       Pending
@@ -356,6 +354,7 @@ const RuDeLabsExpenseList = () => {
                   </div>
                 </div>
               </div>
+              
             </div>
             {/* Page Header */}
             <div className="page-header">
@@ -408,97 +407,6 @@ const RuDeLabsExpenseList = () => {
             {/* /Table */}
           </div>
         </div>
-
-        {/* <AddVendor 
-          setShow={setShow}
-          show={show}
-        /> */}
-
-        {/* <div className="modal custom-modal fade" id="add_expenses" role="dialog">
-          <div className="modal-dialog modal-dialog-centered modal-md">
-            <div className="modal-content">
-              <div className="modal-header border-0 pb-0">
-                <div className="form-header modal-header-title text-start mb-0">
-                  <h4 className="mb-0">Add Expenses</h4>
-                </div>
-                <button
-                  type="button"
-                  className="close"
-                  data-bs-dismiss="modal"
-                  aria-label="Close"
-                >
-                  <span className="align-center" aria-hidden="true">
-                    ×
-                  </span>
-                </button>
-              </div>
-              <div className="modal-body">
-                <div className="row">
-                  <div className="col-lg-12 col-md-12">
-                    <div className="form-group">
-                      <label>Expense ID</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Enter Expense ID"
-                      />
-                    </div>
-                  </div>
-                  <div className="col-lg-12 col-md-12">
-                    <div className="form-group">
-                      <label>Amount </label>
-                      <input
-                        type="number"
-                        className="form-control"
-                        placeholder="Enter Amount"
-                      />
-                    </div>
-                  </div>
-                  <div className="col-lg-4 col-md-6 col-sm-12">
-                          <div className="form-group">
-                            <label>Expense Date</label>
-                            <div className="cal-icon cal-icon-info">
-                              <DatePicker
-                                className="datetimepicker form-control"
-                                selected={expenseDate}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                  <div className="col-lg-12 col-md-12">
-                    <div className="form-group">
-                      <label>Payment Status</label>
-                              <Select2
-                                // className="w-100"
-                                data={payment}
-                                options={{
-                                  placeholder: "Select Payment Status",
-                                }}
-                                
-                              />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="modal-footer">
-                <Link
-                  href="/RuDeLabsExpenseList"
-                  data-bs-dismiss="modal"
-                  className="btn btn-primary paid-cancel-btn me-2"
-                >
-                  Cancel
-                </Link>
-                <Link
-                  href="/RuDeLabsExpenseList"
-                  data-bs-dismiss="modal"
-                  className="btn btn-primary paid-continue-btn"
-                >
-                  Add Expenses
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div> */}
       </div>
     </>
   );
