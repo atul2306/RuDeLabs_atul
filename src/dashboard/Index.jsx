@@ -265,7 +265,7 @@ const Dashboard = () => {
 						</div>
 						<div className="col-xl-5 d-flex">
 							<div className="card flex-fill">
-								<div className="card-header">
+															<div className="card-header">
 									<div className="d-flex justify-content-between align-items-center">
 										<h5 className="card-title">Invoice Analytics</h5> 
 										<div className="dropdown" data-bs-toggle="dropdown">
@@ -280,6 +280,7 @@ const Dashboard = () => {
 										</div>
 									</div>
 								</div>
+								{/* header */}
 								<div className="card-body">
 									<div id="invoice_chart">
 					

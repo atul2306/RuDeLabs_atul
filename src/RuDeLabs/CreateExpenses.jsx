@@ -8,6 +8,7 @@ import {
   AddInvoiceAction,
   ResetStoreAction,
   TotalAmountAction,
+  TotalAmountLeftAction,
   TotalAmountReceivedAction,
 } from "./redux/action/InvoiceAction";
 import StartFireBase from "./firebase/FireBaseConfig";
@@ -63,6 +64,8 @@ const RuDeLabsCreateExpense = () => {
         dispatch(TotalAmountAction({ val: amount.Total, sign: "+" }));
         dispatch(TotalAmountReceivedAction(amount.Total));
       }
+      if(amount.Status === "Pending")
+      dispatch(TotalAmountLeftAction(amount.Total))
 
       const action = AddInvoiceAction({ ...idAdded });
       dispatch(action);

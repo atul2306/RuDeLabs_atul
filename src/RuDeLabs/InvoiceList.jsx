@@ -7,6 +7,7 @@ import {
   itemRender,
 } from "../_components/paginationfunction";
 import Highlighter from "react-highlight-words";
+import ApexCharts from 'apexcharts';
 import RuDeLabsSideBar from "../layouts/RuDeLabsSideBar";
 import RudeLabsHeader from "../layouts/RuDeLabsHeader";
 import StartFireBase from "./firebase/FireBaseConfig";
@@ -21,6 +22,7 @@ import {
   AddInvoiceAction,
   ResetStoreAction,
   TotalAmountAction,
+  TotalAmountLeftAction,
   TotalAmountReceivedAction,
 } from "./redux/action/InvoiceAction";
 import { SearchOutlined } from "@ant-design/icons";
@@ -34,6 +36,33 @@ const RuDeLabsInvoiceList = () => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef(null);
+  const amountTotal = useSelector((state) => state.allAmountReceived);
+  const amountLeft = useSelector((state) => state.allAmountLeft);
+  const invoiceOptions = {
+            colors: ['#7638ff', '#ff737b'],
+            chart: {
+                fontFamily: 'Poppins, sans-serif',
+                height: 220,
+                type: 'donut',
+			},
+			series: [amountTotal,amountLeft],
+            labels: ['Paid', 'Pending'],
+            legend: {show: false},
+            responsive: [{
+                breakpoint: 480,
+                options: {
+                    chart: {
+                        width: 200
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }]
+        }
+
+
+
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -174,6 +203,8 @@ const RuDeLabsInvoiceList = () => {
         dispatch(TotalAmountAction({ val: amount.Total, sign: "+" }));
         dispatch(TotalAmountReceivedAction(amount.Total));
       }
+      if(amount.Status === "Pending")
+      dispatch(TotalAmountLeftAction(amount.Total))
       const action = AddInvoiceAction({ ...idAdded });
       dispatch(action);
     });
@@ -181,7 +212,16 @@ const RuDeLabsInvoiceList = () => {
 
   useEffect(() => {
     getDataFromDb();
+    
   }, []);
+
+  useEffect(() => {
+			
+    let invoiceColumn =  document.getElementById("invoice_chart");
+    let invoiceChart = new ApexCharts(invoiceColumn, invoiceOptions);
+    invoiceChart.render();
+		
+		  },[]);
 
   const toggleMobileMenu = () => {
     setMenu(!menu);
@@ -194,8 +234,8 @@ const RuDeLabsInvoiceList = () => {
 
   const invoice = useSelector((state) => state.allInvoice.invoices);
   const amount = useSelector((state) => state.allAmount);
-  const amountTotal = useSelector((state) => state.allAmountReceived);
-
+ 
+  
 
   const updatedInvoice = invoice.map((data) => {
     const Due_Data = data.Due.seconds;
@@ -358,8 +398,8 @@ const RuDeLabsInvoiceList = () => {
                 </div>
               </div>
             </div>
-            <div className="row">
-              <div className="col-xl-2 col-lg-4 col-sm-6 col-12 d-flex">
+            <div style={{display:"flex" , justifyContent:"space-around",alignItems:"baseline"}}>
+              <div>
                 <div className="card inovices-card w-100">
                   <div className="card-body">
                     <div className="dash-widget-header">
@@ -373,7 +413,7 @@ const RuDeLabsInvoiceList = () => {
                   </div>
                 </div>
               </div>
-              <div className="col-xl-2 col-lg-4 col-sm-6 col-12 d-flex">
+              <div >
                 <div className="card inovices-card w-100">
                   <div className="card-body">
                     <div className="dash-widget-header">
@@ -387,7 +427,34 @@ const RuDeLabsInvoiceList = () => {
                   </div>
                 </div>
               </div>
+              <div style={{width:"20vw", height:"30vh"}} >
+							<div className="card flex-fill">
+								<div className="card-body">
+									<div id="invoice_chart" style={{height:"150px"}}>
+					
+									</div>
+									<div className="text-center text-muted">
+										<div style={{display:"flex" , justifyContent:"space-between"}}>
+										
+											<div className="col-4">
+												<div className="mt-2">
+													<p className="mb-2 text-truncate"><i className="fas fa-circle text-success me-1"></i> Received</p>
+													<h6>{amountTotal}</h6>
+												</div>
+											</div>
+											<div className="col-4">
+                        <div className="mt-2">
+                            <p className="mb-2 text-truncate"><i className="fas fa-circle text-danger me-1"></i> Pending</p>
+                            <h6>{amountLeft}</h6>
+                        </div>
+                    </div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
             </div>
+           
             <div className="card invoices-tabs-card">
               <div className="invoices-main-tabs">
                 <div className="row align-items-center">
