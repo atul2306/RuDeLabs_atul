@@ -188,33 +188,17 @@ const RuDeLabsInvoiceList = () => {
   };
 
   useEffect(() => {
+    
     getDataFromDb();
+
+   
     
   }, []);
 
-  useEffect(() => {
-			
-    let invoiceColumn =  document.getElementById("invoice_chart");
-    let invoiceChart = new ApexCharts(invoiceColumn, invoiceOptions);
-    invoiceChart.render();
-		
-		  },[]);
-
-  const toggleMobileMenu = () => {
-    setMenu(!menu);
-  };
-
-  const formatTimestampToDateTime = (timestamp) => {
-    const date = new Date(timestamp * 1000);
-    return date.toLocaleDateString();
-  };
-
-  const invoice = useSelector((state) => state.allInvoice.invoices);
-  const amount = useSelector((state) => state.allAmount);
   const amountTotal = useSelector((state) => state.allAmountReceived);
   const amountLeft = useSelector((state) => state.allAmountLeft);
   const invoiceOptions = {
-            colors: ['#7638ff', '#ff737b'],
+            colors: ['#22cc62', '#ff0000'],
             chart: {
                 fontFamily: 'Poppins, sans-serif',
                 height: 220,
@@ -236,6 +220,26 @@ const RuDeLabsInvoiceList = () => {
             }]
         }
   
+  useEffect(() => {
+			
+    let invoiceColumn =  document.getElementById("invoice_chart");
+    let invoiceChart = new ApexCharts(invoiceColumn, invoiceOptions);
+    invoiceChart.render(); 
+		
+		  },[]);
+
+  const toggleMobileMenu = () => {
+    setMenu(!menu);
+  };
+
+  const formatTimestampToDateTime = (timestamp) => {
+    const date = new Date(timestamp * 1000);
+    return date.toLocaleDateString();
+  };
+
+  const invoice = useSelector((state) => state.allInvoice.invoices);
+  const amount = useSelector((state) => state.allAmount);
+
 
   const updatedInvoice = invoice.map((data) => {
     const Due_Data = data.Due.seconds;
