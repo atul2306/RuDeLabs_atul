@@ -36,30 +36,7 @@ const RuDeLabsInvoiceList = () => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef(null);
-  const amountTotal = useSelector((state) => state.allAmountReceived);
-  const amountLeft = useSelector((state) => state.allAmountLeft);
-  const invoiceOptions = {
-            colors: ['#7638ff', '#ff737b'],
-            chart: {
-                fontFamily: 'Poppins, sans-serif',
-                height: 220,
-                type: 'donut',
-			},
-			series: [amountTotal,amountLeft],
-            labels: ['Paid', 'Pending'],
-            legend: {show: false},
-            responsive: [{
-                breakpoint: 480,
-                options: {
-                    chart: {
-                        width: 200
-                    },
-                    legend: {
-                        position: 'bottom'
-                    }
-                }
-            }]
-        }
+  
 
 
 
@@ -234,7 +211,30 @@ const RuDeLabsInvoiceList = () => {
 
   const invoice = useSelector((state) => state.allInvoice.invoices);
   const amount = useSelector((state) => state.allAmount);
- 
+  const amountTotal = useSelector((state) => state.allAmountReceived);
+  const amountLeft = useSelector((state) => state.allAmountLeft);
+  const invoiceOptions = {
+            colors: ['#7638ff', '#ff737b'],
+            chart: {
+                fontFamily: 'Poppins, sans-serif',
+                height: 220,
+                type: 'donut',
+			},
+			series: [amountTotal,amountLeft],
+            labels: ['Paid', 'Pending'],
+            legend: {show: false},
+            responsive: [{
+                breakpoint: 480,
+                options: {
+                    chart: {
+                        width: 200
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }]
+        }
   
 
   const updatedInvoice = invoice.map((data) => {
